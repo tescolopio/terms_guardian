@@ -1,5 +1,6 @@
 # Term_Guardian
 
+This README and the code is currently a WIP. None of the links below are currently working and codebase is in its beginning stages.
 Term_Guardian is a web browser extension designed to empower users by demystifying the complex language often found in Terms of Service (ToS) agreements. It automatically detects ToS text on websites, grades its readability, summarizes its content into plain language, and assesses the rights retained or surrendered.
 
 ## Features
