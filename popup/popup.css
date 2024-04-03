@@ -1,0 +1,47 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+}
+
+#gradeResults {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+h2, h3 {
+  color: #333333;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+p {
+  margin: 10px 0;
+}
+
+#clarityGrade, #contentGrade, #keyExcerpts, #reasons {
+  margin-bottom: 20px;
+}
+
+.grade {
+  font-weight: bold;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+.grade.A-plus { background-color: #4CAF50; }
+.grade.B, .grade.C { background-color: #FFEB3B; color: #333; }
+.grade.D, .grade.F { background-color: #F44336; }
+
+.keyExcerpts, .reasons {
+  border-left: 4px solid #2196F3;
+  padding-left: 15px;
+}
