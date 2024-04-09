@@ -31,7 +31,7 @@ To get started with Term_Guardian, follow these steps:
 
 Term_Guardian is dual-licensed:
 
-- The Free Version is available under the MIT License. See [LICENSE](./LICENSE) for more details.
+- The Free Version is available under the custom license. See [LICENSE](./LICENSE.md) for more details.
 - The Premium Version requires a commercial license. Please [contact us](#) for commercial licensing information.
 
 ## Support
