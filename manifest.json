@@ -1,24 +1,61 @@
 {
+  "name": "Terms Guardian - Side Panel",
+  "version": "1.0.0",
   "manifest_version": 3,
-  "name": "Terms_Guardian",
-  "version": "1.0",
-  "description": "Analyze user agreements for clarity and content directly in your browser.",
-  "permissions": ["activeTab", "contextMenus", "storage", "tabs"],
+  "description": "Empowers users by demystifying Terms of Service agreements.",
+  "author": "Timmothy Escolopio",
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "sidePanel", 
+    "contextMenus", 
+    "notifications",
+    "storage",
+    "webRequest",
+    "scripting"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "default_popup": "popup.html"
+  },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "service-worker.js",
+    "type": "module" 
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentScript.js"]
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end",
+      "type": "module"
     }
   ],
-  "action": {
-    "default_popup": "popup/popup.html",
-    "default_icon": {
-      "16": "images/icon16.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "legalTerms.js",
+        "popup.html", 
+        "sidepanel.html", 
+        "styles.css",
+        "node_modules/cheerio/lib/cheerio.min.js",
+        "node_modules/compromise/builds/compromise.min.js"
+      ],
+      "matches": ["<all_urls>"]
     }
-  }
+  ]
 }

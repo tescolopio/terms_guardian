@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms Guardian Analysis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="sidepanel-content">
+    <h1>Terms Guardian</h1>
+    <h2>Know Your Terms, Know Your Rights!</h2>
+
+    <div class="analysis-header">
+        <a href="https://companyx.com/termsofservice" target="_blank" rel="noopener">https://companyx.com/termsofservice</a>
+        <h3>Company X Terms of Service</h3>
+        <a href="https://companyx.com/termsofservice" target="_blank" rel="noopener">https://companyx.com/termsofservice</a>
+      </div>
+      <div class="scores">
+        <div class="score readability-score" onmouseover="showPopup('readabilityPopup')" onmouseout="hidePopup('readabilityPopup')">
+          <span id="readability-grade">B</span>
+          <p>Readability Score</p>
+          <div id="readabilityPopup" class="popup">
+            </div>
+        </div>
+        <div class="score user-rights-index" onmouseover="showPopup('rightsPopup')" onmouseout="hidePopup('rightsPopup')">
+          <span id="user-rights-index">A</span>
+          <p>User Rights Index</p>
+          <div id="rightsPopup" class="popup">
+            </div>
+        </div>
+      </div> 
+    </div>
+
+    <div class="analysis-content">
+      <div class="column">
+        <h2>Overall Summary</h2>
+        <p id="overall-summary">Loading summary...</p>
+      </div>
+      <div class="column">
+        <h2>Summary by Section</h2>
+        <div id="section-summaries">
+          </div>
+      </div>
+    </div>
+
+    <div class="additional-info">
+      <div class="key-excerpts" onmouseover="showPopup('excerptsPopup')" onmouseout="hidePopup('excerptsPopup')">
+        <h2>Key Excerpts</h2>
+        <ul id="key-excerpts-list">
+          </ul>
+        <div id="excerptsPopup" class="popup">
+          </div>
+      </div>
+      <div class="uncommon-terms" onmouseover="showPopup('termsPopup')" onmouseout="hidePopup('termsPopup')">
+        <h2>Uncommon Terms</h2>
+        <div id="uncommon-terms-list">
+          </div>
+        <div id="termsPopup" class="popup">
+          </div>
+      </div>
+    </div>
+      <button type="button">Contact Us</button>
+      <button type="button">Report Issue</button>
+      <button type="button">Github</button>
+      <button type="button">Give Feedback</button>
+      <button type="button">Donate</button>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

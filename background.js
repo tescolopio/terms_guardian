@@ -1,183 +1,190 @@
 /**
- * Logs a message to the console.
- * @param {string} message The message to log.
+ * @file background.js
+ * @description This script handles background tasks for the Chrome extension, including processing Terms of Service (ToS) text, managing notifications, and updating the extension's side panel. It listens for messages from content scripts, processes ToS text using various analysis functions, and updates the extension badge and side panel based on the analysis results. Additionally, it manages the state of notifications for different domains and handles user interactions with the extension's icon and context menu.
+ * @contributors {tescolopio}
+ * @version 1.0.0
+ * @date 2024-09-21
+ * 
+ * @author Timmothy Escolopio
+ * @company 3D Tech Solutions LLC
+ * 
+ * @changes
+ *  - 2024-09-18 | tescolopio | Initial creation of the script.
+ *  - 2024-09-21 | tescolopio | Moved functionality from background.js to utilities.js and content.js for better separation of concerns.
  */
-function log(message) {
-  console.log(message);
-}
 
-/**
- * Calculates the Flesch Reading Ease score of a text.
- * @param {string} text The text to calculate the score for.
- * @return {number} The Flesch Reading Ease score.
- */
-function fleschReadingEase(text) {
-  const sentenceLength = text.split(".").length;
-  const wordCount = text.split(" ").length;
-  const syllableCount = text.split(" ").reduce((total, word) => {
-    return total + (word.match(/[aeiouy]/gi)? word.match(/[aeiouy]/gi).length : 0);
-  }, 0);
-  return 206.835 - 1.015 * (wordCount / sentenceLength) - 84.6 * (syllableCount / wordCount);
-}
+// Import necessary modules
+import { calculateReadabilityGrade } from './readabilityGrader.js'; 
+import { analyzeContentWithTensorFlow } from './rightsAssessor.js'; 
+import { summarizeTos } from './summarizeTos.js';
+import { load } from './node_modules/cheerio/lib/cheerio.min.js';
+import { log, logLevels } from './debugger.js';
+import { identifyUncommonWords } from './uncommonWordsIdentifier.js';
+import { updateSidepanel } from './sidepanel.js';
+import { showNotification, updateExtensionIcon, extractDomain } from './utilities.js';
+import { legalTerms } from './legalTerms.js';
 
-/**
- * Calculates the Flesch-Kincaid Grade Level of a text.
- * @param {string} text The text to calculate the score for.
- * @return {number} The Flesch-Kincaid Grade Level.
- */
-function fleschKincaidGradeLevel(text) {
-  const sentenceLength = text.split(".").length;
-  const wordCount = text.split(" ").length;
-  const syllableCount = text.split(" ").reduce((total, word) => {
-    return total + (word.match(/[aeiouy]/gi)? word.match(/[aeiouy]/gi).length : 0);
-  }, 0);
-  return 0.39 * (wordCount / sentenceLength) + 11.8 * (syllableCount / wordCount) - 15.59;
-}
+// Object to keep track of domains that have been notified 
+const notifiedDomains = {};
 
-/**
- * Calculates the Gunning Fog Index of a text.
- * @param {string} text The text to calculate the score for.
- * @return {number} The Gunning Fog Index.
- */
-function gunningFogIndex(text) {
-  const sentenceLength = text.split(".").length;
-  const wordCount = text.split(" ").length;
-  const complexWordCount = text.split(" ").reduce((total, word) => {
-    return total + (word.match(/[aeiouy]/gi) && word.match(/[aeiouy]/gi).length >= 3? 1 : 0);
-  }, 0);
-  return 0.4 * ((wordCount / sentenceLength) + 100 * (complexWordCount / wordCount));
-}
+// Handle messages from content.js 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  log(logLevels.DEBUG, 'Received message in background.js:', message); // Log all incoming messages
 
-/**
- * Calculates the readability grade of a text.
- * @param {string} text The text to calculate the grade for.
- * @return {string} The readability grade.
- */
-function calculateReadabilityGrade(text) {
-  const fleschScore = fleschReadingEase(text);
-  const kincaidScore = fleschKincaidGradeLevel(text);
-  const fogIndexScore = gunningFogIndex(text);
-
-  const averageScore = (fleschScore + kincaidScore + fogIndexScore) / 3;
-
-  // This is a simple mapping to convert score to grade, needs refining
-  if (averageScore > 90) return "A";
-  else if (averageScore > 70) return "B";
-  else if (averageScore > 50) return "C";
-  else if (averageScore > 30) return "D";
-  else return "F";
-}
-
-/**
- * Analyzes text using a TensorFlow.js model.
- * @param {string} text The text to analyze.
- * @return {string} The content grade.
- */
-async function analyzeContentWithTensorFlow(text) {
-  console.log("Analyzing content with TensorFlow.js...");
-  const contentGrade = await modelHandler.analyzeText(text);
-  return contentGrade;
-}
-
-/**
- * Stores analysis results in memory.
- * @param {object} results The analysis results.
- */
-function storeAnalysisResults(results) {
-  analysisResults = results;
-}
-
-/**
- * Retrieves analysis results from memory.
- * @return {object} The analysis results.
- */
-function retrieveAnalysisResults() {
-  return analysisResults;
-}
-
-/**
- * Creates a context menu item for grading a selected text.
- */
-function createContextMenu() {
-  chrome.contextMenus.create({
-    id: "gradeAgreement",
-    title: "Grade this Agreement",
-    contexts: ["selection"]
-  }, function() {
-    if (chrome.runtime.lastError) {
-      console.error("Error creating context menu:", chrome.runtime.lastError.message);
-    } else {
-      console.log("Context menu created successfully.");
-    }
-  });
-}
-
-/**
- * Listens for messages from other scripts or pages.
- * @param {object} request The message data.
- * @param {function} sendResponse A function for sending a response.
- */
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === "analyzeText") {
-    console.log("Received text for analysis.");
-    if (!request.text) {
-      console.error("No text provided for analysis.");
-      sendResponse({ error: "No text provided for analysis." });
-      return;
-    }
-    try {
-      const textToAnalyze = request.text;
-      const readabilityGrade = calculateReadabilityGrade(textToAnalyze);
-      const contentGrade = await analyzeContentWithTensorFlow(textToAnalyze);
-      const keyExcerpts = "This is a key excerpt from the agreement.";
-      const reasons = "The agreement has clear terms and favors user rights.";
-
-      const results = {
-        clarityGrade: readabilityGrade,
-        contentGrade: contentGrade,
-        keyExcerpts: keyExcerpts,
-        reasons: reasons
-      };
-
-      storeAnalysisResults(results);
-      console.log("Analysis results stored.");
-      sendResponse(results);
-    } catch (error) {
-      console.error("Error analyzing text:", error.message, error.stack);
-      sendResponse({ error: "Error analyzing text. Please check the console for more details." });
-    }
-  } else if (request.action === "requestAnalysisResults") {
-    console.log("Received request for analysis results.");
-
-    if (Object.keys(analysisResults).length!== 0) {
-      sendResponse(analysisResults);
-      console.log("Analysis results sent from storage.");
-    } else {
-      sendResponse({
-        error: "No analysis results available."
-      });
-      console.log("No stored analysis results found.");
-    }
+  if (message.action === "showNotification" && message.agreementDetected) {
+    handleShowNotification(message, sender);
+  } else if (message.action === "checkNotification") { 
+    handleCheckNotification(message, sender, sendResponse);
+  } else if (message.type === "tosDetected") {
+    handleTosDetected(message);
+  } else if (message.type === "legalTextNotFound") { // Use 'message' instead of 'request'
+    handleLegalTextNotFound();
+  } else if (message.type === "sidepanelOpened") {
+    handleSidepanelOpened();
   }
-  return true; // Indicates asynchronous response
 });
 
-/**
- * Listens for context menu clicks.
- * @param {object} info The click information.
- * @param {object} tab The active tab.
- */
-chrome.contextMenus.onClicked.addListener(function(info, tab) {
-  if (info.menuItemId === "gradeAgreement") {
-    chrome.tabs.executeScript({
-      code: "window.getSelection().toString();"
-    }, function(selection) {
-      const selectedText = selection[0];
-      if (selectedText) {
-        console.log("User agreement text selected.");
-        chrome.runtime.sendMessage({ action: "analyzeText", text: selectedText });
+// Function to handle checkNotification messages
+function handleCheckNotification(message, sender, sendResponse) { 
+  log(logLevels.DEBUG, 'Received checkNotification message:', message);
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    log(logLevels.DEBUG, 'Active tabs:', tabs);
+    if (tabs && tabs.length > 0) {
+      const domain = extractDomain(tabs[0].url);
+      log(logLevels.DEBUG, 'Checking notification for domain:', domain);
+      sendResponse({shouldShow: notifiedDomains[domain] || false});
+    } else {
+      log(logLevels.ERROR, 'No active tab found'); // Use logLevels.ERROR for error logging
+      sendResponse({shouldShow: false, error: 'No active tab found'});
+    }
+  });
+  return true; 
+}
+
+// ToS text processing 
+async function handleTosDetected(message) {
+  const tosText = message.text;
+  log(logLevels.INFO, `ToS text detected: ${tosText}`);
+  
+  // Load Cheerio and then proceed with the analysis
+  load(tosText).then(async $ => {  // Use await inside the .then callback
+    // 1. Summarize the ToS text using Cheerio for section identification
+    const summary = summarizeTos($);
+    log(logLevels.INFO, `ToS summary: ${summary}`);
+  
+    // 2. Calculate readability grades 
+    const readabilityGrades = calculateReadabilityGrade(tosText); 
+    log(logLevels.INFO, `Readability grades: ${JSON.stringify(readabilityGrades)}`);
+  
+    // 3. Assess rights retention (assuming analyzeContentWithTensorFlow is async)
+    const rightsAssessment = await analyzeContentWithTensorFlow(tosText); 
+    log(logLevels.INFO, `Rights assessment: ${JSON.stringify(rightsAssessment)}`);
+  
+    // 4. Identify and define uncommon words
+    const uncommonWords = identifyUncommonWords(tosText);
+    log(logLevels.INFO, `Uncommon words: ${JSON.stringify(uncommonWords)}`);
+  
+    // 5. Update the sidepanel with the processed information
+    updateSidepanel({
+      summary,
+      readabilityGrades,
+      rightsAssessment,
+      uncommonWords
+    });
+
+    // Store the analysis results in local storage
+    await chrome.storage.local.set({ [`analysisResults_${sender.tab.id}`]: {
+    summary,
+    readabilityGrades,
+    rightsAssessment,
+    uncommonWords
+  }});
+  })
+  .catch(error => {
+    log(logLevels.ERROR, `Error loading or parsing ToS text with Cheerio: ${error}`);
+    // Handle the error gracefully
+  });
+  
+  updateExtensionIcon(true); 
+}
+
+// Function to handle legal text not found
+function handleLegalTextNotFound() {
+  log(logLevels.INFO, "Legal text not found.");
+  showNotification("Not enough legal text found.");
+  updateExtensionIcon(false);
+}
+
+// Function to handle sidepanel opened
+function handleSidepanelOpened() {
+  log(logLevels.INFO, "Sidepanel opened. Updating sidepanel with prompt.");
+  updateSidepanel("This page doesn't appear to be a legal agreement. Do you want to proceed with grading the text on the page?");
+}
+
+// Clear notifications when tabs are closed
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  chrome.tabs.query({}, (tabs) => {
+    const activeDomains = new Set(tabs.map(tab => extractDomain(tab.url)));
+    Object.keys(notifiedDomains).forEach(domain => {
+      if (!activeDomains.has(domain)) {
+        delete notifiedDomains[domain];
+        log(logLevels.INFO, `Cleared notification status for domain: ${domain}`);
+      }
+    });
+  });
+});
+
+// Handle extension icon clicks 
+chrome.action.onClicked.addListener(async (tab) => {
+  log(logLevels.INFO, 'Extension icon clicked');
+
+  // Open the side panel
+  await chrome.sidePanel.open({ tabId: tab.id }); 
+
+  // Check if we have analysis results stored for the current tab
+  const storedResults = await chrome.storage.local.get(`analysisResults_${tab.id}`);
+
+  if (storedResults && storedResults[`analysisResults_${tab.id}`]) {
+    // If we have stored results, display them in the side panel
+    updateSidepanel(storedResults[`analysisResults_${tab.id}`]);
+  } else {
+    // Check if fewer than 10 legal terms were detected
+    const legalTermCount = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        const elements = document.querySelectorAll('a, p, h1, h2, h3, h4, h5, h6');
+        let legalTermCount = 0;
+        elements.forEach(element => {
+          const text = element.textContent.toLowerCase();
+          if (legalTerms.some(keyword => text.includes(keyword))) {
+            legalTermCount++;
+          }
+        });
+        return legalTermCount;
+      }
+    });
+
+    if (legalTermCount[0].result < 10) {
+      // If fewer than 10 terms, display the informational state
+      updateSidepanel({ state: 'informational' }); 
+    } else {
+      // If 10 or more terms, but no analysis yet, display a prompt
+      updateSidepanel({ error: 'No analysis has been performed yet. Please trigger the analysis from the notification or context menu.' }); 
+    }
+  }
+});
+
+// Listener for context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "gradeThisText") {
+    log(logLevels.INFO, "Context menu item 'gradeThisText' clicked.", { info, tab });
+    
+    // Send message to content.js to initiate detection
+    chrome.tabs.sendMessage(tab.id, { type: "gradeText" }, (response) => {
+      if (chrome.runtime.lastError) {
+        log(logLevels.ERROR, "Error sending message to content script.", chrome.runtime.lastError);
       } else {
-        console.log("No text selected.");
+        log(logLevels.DEBUG, "Message sent to content script successfully.", response);
       }
     });
   }

@@ -1,1 +1,13 @@
-node_modules
+# Ignore workspace settings files
+*.code-workspace
+
+# Other common ignores
+node_modules/
+dist/
+datasets/
+popup/
+.env
+.vscode/
+
+# Ignore backup files
+*.old
