@@ -1,3 +1,16 @@
+/**
+ * @file modelHandler.js
+ * @description This file contains the ModelHandler class that handles loading a model and analyzing text using the model.
+ * @version 1.0.0
+ * @date 2024-09-25
+ * 
+ * @author Timmothy Escolopio
+ * @company 3D Tech Solutions LLC
+ * 
+ * @changes
+ *  - 2024-09-25 | tescolopio | Initial creation of the script.
+ */
+
 import * as tf from '@tensorflow/tfjs';
 
 export class ModelHandler {
@@ -40,13 +53,6 @@ export class ModelHandler {
         }
     }
 
-    preprocessText(text) {
-        // Placeholder for text preprocessing logic
-        // Ideally, this should convert the text to a format suitable for your model. This might include tokenization, padding, or normalization.
-        // For demonstration purposes, we return a simplistic transformation. Ensure to replace it with actual preprocessing steps.
-        // This is a simplistic example. You need to replace it with actual preprocessing suitable for your model.
-        return text.split(' ').map(word => word.length); // Example preprocessing, replace with actual preprocessing steps
-    }
 
     async postprocessPrediction(prediction) {
         // Placeholder for postprocessing logic

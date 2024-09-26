@@ -9,7 +9,9 @@ const commonWords = [
     'many', 'much', 'few', 'less', 'least', 'own', 'same', 'other', 'another', 'new', 'old', 
     'good', 'bad', 'great', 'small', 'large', 'long', 'short', 'high', 'low', 'early', 'late', 
     'young', 'old', 'right', 'left', 'next', 'last', 'first', 'second', 'third', 'fourth', 
-    'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'
+    'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth','about', 'after', 'again', 'against', 'between', 'both', 'down', 'during', 'each', 'few', 'from', 'how', 'into', 'just', 'like', 'more', 'most', 'now', 'only', 'other', 
+    'out', 'over', 'then', 'there', 'through', 'under', 'very', 'was', 'were', 'what', 
+    'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'will', 'with', 'without'
 ];
 
 export default commonWords;
