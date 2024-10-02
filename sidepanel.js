@@ -1,4 +1,4 @@
-// summarizeTos.js
+//sidepanel.js
 
 import { getAnalysisResults } from './content.js';
 import { log, logLevels } from './debugger.js';

@@ -26,8 +26,7 @@
       "32": "images/icon32.png",
       "48": "images/icon48.png",
       "128": "images/icon128.png"
-    },
-    "default_popup": "popup.html"
+    }
   },
   "background": {
     "service_worker": "service-worker.js",
@@ -48,8 +47,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "legalTerms.js",
-        "popup.html", 
+        "legalTerms.js", 
         "sidepanel.html", 
         "styles.css",
         "node_modules/cheerio/lib/cheerio.min.js",

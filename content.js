@@ -18,8 +18,6 @@
 // Imports and Constants
 import { log, logLevels } from './debugger.js';
 import legalTerms from './legalTerms.js';
-import { sendMessageToBackground, showNotification } from './background.js';
-import { isLegalText } from './legalTextChecker.js';
 import { sendMessageToBackground, showNotification, containsLegalTerm, containsPartialMatch, containsProximityMatch } from './utilities.js';
 
 const DETECTION_INTERVAL = 5000; // 5 seconds interval
@@ -174,7 +172,7 @@ chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
     const selectedText = window.getSelection().toString();
     log(logLevels.DEBUG, "Selected text for grading:", selectedText);
 
-    const hasEnoughLegalText = isLegalText(selectedText); // Store the result
+    const hasEnoughLegalText = detectLegalAgreements(selectedText); // Store the result
 
     if (hasEnoughLegalText) {
       log(logLevels.INFO, "Enough legal text found in selection.");
