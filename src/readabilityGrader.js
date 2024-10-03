@@ -14,7 +14,7 @@
  *  - 2024-09-25 | tescolopio | updated the readability grade ranges.
  */
 
-import { log, logLevels } from './debugger.js';
+import { log, logLevels } from './src/debugger.js';
 
 /**
  * Extracts words from a text, handling punctuation and special characters.

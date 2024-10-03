@@ -18,7 +18,7 @@
 // Imports and Constants
 import { log, logLevels } from './debugger.js';
 import legalTerms from './legalTerms.js';
-import { sendMessageToBackground, showNotification, containsLegalTerm, containsPartialMatch, containsProximityMatch } from './utilities.js';
+import { sendMessageToBackground, showNotification, containsLegalTerm, containsPartialMatch, containsProximityMatch } from '../utilities.js';
 
 const DETECTION_INTERVAL = 5000; // 5 seconds interval
 let lastDetectionTime = 0;
