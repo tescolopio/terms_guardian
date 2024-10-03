@@ -13,8 +13,8 @@
  * 
  */
 
-import { log, logLevels } from './debugger.js';
-import legalTerms from './legalTerms.js';
+import { log, logLevels } from './src/debugger.js';
+import legalTerms from './src/legalTerms.js';
 
 // Function to show a notification
 export function showNotification(message) {
