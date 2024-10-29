@@ -1,5 +1,19 @@
-// legalTerms.js
-const legalTerms = [
+/**
+ * @file legalTerms.js
+ * @description This script contains an array of legal terms used for detecting legal agreements.
+ * @contributors {tescolopio}
+ * @version 1.1.0
+ * @date 2024-09-25
+ * 
+ * @author Timmothy Escolopio
+ * @company 3D Tech Solutions LLC
+ * 
+ * @changes
+ *  - 2024-09-18 | tescolopio | Initial creation of the script.
+ *  - 2024-09-25 | tescolopio | Modified to work with Chrome extension content scripts.
+ */
+
+window.legalTerms = [
     'terms of service', 'terms and conditions', 'user agreement', 'service agreement',
     'terms of use', 'legal terms', 'user terms', 'usage policy', 'acceptable use policy',
     'end user license agreement', 'eula', 'legal notice', 'site terms', 'website terms',
@@ -11,5 +25,3 @@ const legalTerms = [
     'sla', 'data protection', 'cookie policy', 'gdpr', 'ccpa', 'privacy policy', 'refund policy',
     'return policy', 'cancellation policy', 'billing terms', 'payment terms', 'subscription terms'
 ];
-
-export default legalTerms;

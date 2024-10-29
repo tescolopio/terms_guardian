@@ -1,5 +1,5 @@
 // commonWords.js
-const commonWords = [
+window.commonWords = [
     'a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'is', 'it', 
     'of', 'on', 'or', 'so', 'the', 'to', 'up', 'with', 'you', 'your', 'i', 'me', 'my', 
     'we', 'us', 'our', 'he', 'him', 'his', 'she', 'her', 'they', 'them', 'their', 'itself', 
@@ -13,5 +13,3 @@ const commonWords = [
     'out', 'over', 'then', 'there', 'through', 'under', 'very', 'was', 'were', 'what', 
     'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'will', 'with', 'without'
 ];
-
-export default commonWords;

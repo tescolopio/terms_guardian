@@ -35,9 +35,14 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["styles.css"],
-      "run_at": "document_end",
+      "js": [
+        "src/debugger.js",
+        "src/readabilityGrader.js",
+        "src/content.js",
+        "src/utilities.js"
+      ],
+      "css": ["src/styles.css"],
+      "run_at": "document_idle",
       "type": "module"
     }
   ],
@@ -48,7 +53,7 @@
     {
       "resources": [
         "src/legalTerms.js", 
-        "sidepanel.html", 
+        "src/sidepanel.html", 
         "src/styles.css",
         "node_modules/cheerio/lib/cheerio.min.js",
         "node_modules/compromise/builds/compromise.min.js"
