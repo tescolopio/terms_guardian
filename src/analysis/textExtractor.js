@@ -1,174 +1,342 @@
 /**
  * @file textExtractor.js
- * @description Extracts and analyzes text from web pages for legal content.
- * @version 1.1.0
- * @date 2024-09-30
+ * @description Service for extracting text from various document formats
+ * @version 2.0.0
  */
 
-(function(window) {
-    // Assume these are globally available
-    const { log, logLevels, config, legalTerms } = window;
+(function (global) {
+  'use strict';
+
+  function createTextExtractor({ log, logLevels, utilities }) {
+    if (!utilities) {
+      throw new Error('Utilities service must be provided to text extractor');
+    }
+
+    const { showNotification } = utilities;
+
+    // Add error types for better error handling
+    const ERROR_TYPES = {
+      INCOMPLETE_HTML: 'INCOMPLETE_HTML',
+      MALFORMED_HTML: 'MALFORMED_HTML',
+      PDF_EXTRACTION: 'PDF_EXTRACTION',
+      DOCX_EXTRACTION: 'DOCX_EXTRACTION',
+      INVALID_INPUT: 'INVALID_INPUT',
+    };
 
     /**
-     * Preprocesses text by removing extra whitespace and normalizing case
-     * @param {string} text The text to preprocess
-     * @return {string} The preprocessed text
+     * Handles extraction errors and shows appropriate notifications
+     */
+    async function handleExtractionError(error, type, content) {
+      log(logLevels.ERROR, `Extraction error (${type}):`, error);
+
+      let notificationConfig = {
+        type: 'basic',
+        requireInteraction: true,
+      };
+
+      switch (type) {
+        case ERROR_TYPES.INCOMPLETE_HTML:
+          return new Promise(resolve => {
+            showNotification(
+              {
+                ...notificationConfig,
+                title: 'Incomplete HTML Detected',
+                message:
+                  'The HTML content contains incomplete tags. Would you like to extract the text anyway?',
+                buttons: [{ title: 'Yes, extract anyway' }, { title: 'No, skip extraction' }],
+              },
+              wasConfirmed => {
+                if (wasConfirmed) {
+                  resolve(preprocessText(content));
+                } else {
+                  resolve('');
+                }
+              }
+            );
+          });
+
+        case ERROR_TYPES.MALFORMED_HTML:
+          showNotification({
+            ...notificationConfig,
+            title: 'Malformed HTML',
+            message:
+              'The HTML content is malformed and cannot be parsed. Please check the content and try again.',
+          });
+          return '';
+
+        case ERROR_TYPES.PDF_EXTRACTION:
+          showNotification({
+            ...notificationConfig,
+            title: 'PDF Extraction Error',
+            message:
+              'There was an error extracting text from the PDF. Please ensure the file is not corrupted or password-protected.',
+          });
+          return '';
+
+        case ERROR_TYPES.DOCX_EXTRACTION:
+          showNotification({
+            ...notificationConfig,
+            title: 'DOCX Extraction Error',
+            message:
+              'There was an error extracting text from the Word document. Please ensure the file is not corrupted.',
+          });
+          return '';
+
+        default:
+          showNotification({
+            ...notificationConfig,
+            title: 'Extraction Error',
+            message: 'An unexpected error occurred during text extraction. Please try again.',
+          });
+          return '';
+      }
+    }
+
+    /**
+     * Preprocesses text by normalizing whitespace, case, and special characters
      */
     function preprocessText(text) {
-        log(logLevels.DEBUG, 'Preprocessing text');
-        const preprocessedText = text.replace(/\s+/g, ' ').trim().toLowerCase();
-        log(logLevels.DEBUG, 'Text preprocessed', { originalText: text, preprocessedText });
-        return preprocessedText;
+      if (!text || typeof text !== 'string') return '';
+
+      log(logLevels.DEBUG, 'Preprocessing text');
+
+      const preprocessedText = text
+        .replace(/\r?\n|\r/g, ' ') // Replace newlines with spaces
+        .replace(/\t/g, ' ') // Replace tabs with spaces
+        .replace(/\f/g, ' ') // Replace form feeds with spaces
+        .replace(/\v/g, ' ') // Replace vertical tabs with spaces
+        .replace(/\u00A0/g, ' ') // Replace non-breaking spaces with regular spaces
+        .replace(/\u2028/g, ' ') // Replace line separators with spaces
+        .replace(/\u2029/g, ' ') // Replace paragraph separators with spaces
+        .replace(/[^\S\r\n]+/g, ' ') // Replace multiple spaces with single space
+        .trim(); // Remove leading/trailing whitespace
+
+      log(logLevels.DEBUG, 'Text preprocessed');
+      return preprocessedText;
     }
 
     /**
-     * Extracts and analyzes text from the entire page, section by section.
-     * @return {Promise<string>} A promise that resolves to the extracted legal text 
-     * or an empty string if none is found.
+     * Extracts text from HTML content with enhanced error handling
      */
-    async function extractAndAnalyzePageText() {
-        try {
-            log(logLevels.DEBUG, 'Starting text extraction and analysis');
+    async function extractFromHTML(html) {
+      try {
+        if (!html) return '';
 
-            // Attempt to extract legal text based on highlighted elements
-            const extractedTextFromHighlights = extractTextFromHighlights();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-            if (extractedTextFromHighlights) {
-                log(config.logLevel, "Legal text extracted from highlights successfully.");
-                return extractedTextFromHighlights;
-            } 
-
-            // If extraction from highlights fails, try section-based extraction
-            const extractedTextFromSections = await extractTextFromSections();
-
-            if (extractedTextFromSections) {
-                log(config.logLevel, "Legal text extracted from sections successfully.");
-                return extractedTextFromSections;
-            } 
-
-            log(config.logLevel, "No legal text found on the page.");
-            return '';
-
-        } catch (error) {
-            log(logLevels.ERROR, "Error extracting and analyzing page text", { error });
-            return '';
+        // Check for parser errors
+        const parserError = doc.querySelector('parsererror');
+        if (parserError) {
+          return await handleExtractionError(
+            new Error(parserError.textContent),
+            ERROR_TYPES.INCOMPLETE_HTML,
+            doc.body.textContent
+          );
         }
-    }
 
-    /**
-     * Extracts text based on number of highlighted sections
-     * @return {string|null} The extracted text or null if not enough highlights are found
-     */
-    function extractTextFromHighlights() {
-        try {
-            log(logLevels.DEBUG, 'Starting text extraction from highlights');
-            
-            const legalElements = document.querySelectorAll('.legal-term-highlight'); 
-            log(logLevels.DEBUG, 'Number of legal-term-highlight elements found', { count: legalElements.length });
+        // Remove unwanted elements
+        const excludeSelectors = [
+          'script',
+          'style',
+          'noscript',
+          'iframe',
+          'svg',
+          'header',
+          'footer',
+          'nav',
+          '[role="navigation"]',
+          '.cookie-banner',
+          '.ad',
+          '.advertisement',
+          'meta',
+          'link',
+          'head',
+        ];
 
-            if (legalElements.length > config.highlightThreshold) {
-                log(logLevels.INFO, 'Highlight threshold exceeded, extracting full body text');
-                return document.body.innerText;
-            } else {
-                let fullText = '';
-                legalElements.forEach((element) => {
-                    fullText += element.textContent + '\n\n';
-                });
-                const preprocessedText = preprocessText(fullText);
-                log(logLevels.DEBUG, 'Extracted and preprocessed text from highlights', { preprocessedText });
-                return preprocessedText;
-            }
-        } catch (error) {
-            log(logLevels.ERROR, 'Error extracting text from highlights', { error });
-            return null;
-        }
-    }
+        excludeSelectors.forEach(selector => {
+          doc.querySelectorAll(selector).forEach(el => el.remove());
+        });
 
-    /**
-     * Extracts and analyzes text from sections on the page
-     * @return {Promise<string|null>} The extracted legal text or null if none is found
-     */
-    async function extractTextFromSections() {
-        try {
-            log(logLevels.DEBUG, 'Starting text extraction from sections');
-            
-            const sections = document.querySelectorAll('main, article, section, div[class*="terms"], div[id*="terms"]'); 
-            log(logLevels.DEBUG, 'Number of sections found', { count: sections.length });
+        // Extract text while preserving structure
+        function extractNodeText(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent.trim();
+          }
 
-            if (sections.length === 0) {
-                log(logLevels.WARN, 'No sections found for extraction');
-                return null;
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const tag = node.tagName.toLowerCase();
+            const text = Array.from(node.childNodes).map(extractNodeText).filter(Boolean).join(' ');
+
+            // Add spacing for block elements
+            if (
+              ['div', 'p', 'section', 'article', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)
+            ) {
+              return `\n${text}\n`;
             }
 
-            let legalText = '';
+            return text;
+          }
 
-            sections.forEach((section) => {
-                const sectionText = extractTextFromSection(section);
-                log(logLevels.DEBUG, 'Extracted text from section', { sectionText });
-
-                if (isLegalText(sectionText)) {
-                    legalText += sectionText + '\n\n';
-                    log(logLevels.DEBUG, 'Section text identified as legal text', { sectionText });
-                }
-            });
-
-            const trimmedText = preprocessText(legalText);
-            log(logLevels.DEBUG, 'Trimmed and preprocessed legal text', { trimmedText });
-
-            return trimmedText || null; 
-        } catch (error) {
-            log(logLevels.ERROR, 'Error extracting text from sections', { error });
-            return null;
+          return '';
         }
+
+        const extractedText = extractNodeText(doc.body);
+        return preprocessText(extractedText);
+      } catch (error) {
+        return await handleExtractionError(error, ERROR_TYPES.MALFORMED_HTML);
+      }
     }
 
     /**
-     * Extracts text from a section, filtering out non-textual elements
-     * @param {Element} section The section element to extract text from
-     * @return {string|null} The extracted text from the section or null if an error occurs
+     * Extracts text from PDF content (base64 or ArrayBuffer)
      */
-    function extractTextFromSection(section) {
-        try {
-            log(logLevels.DEBUG, 'Starting text extraction from section', { section });
+    async function extractFromPDF(pdfData) {
+      try {
+        if (!pdfData) return '';
 
-            const filteredContent = Array.from(section.children).filter(child => 
-                !['NAV', 'HEADER', 'FOOTER', 'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED'].includes(child.tagName)
+        // Convert base64 to ArrayBuffer if needed
+        const arrayBuffer = typeof pdfData === 'string' ? base64ToArrayBuffer(pdfData) : pdfData;
+
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let extractedText = '';
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(' ');
+          extractedText += pageText + '\n';
+        }
+
+        return preprocessText(extractedText);
+      } catch (error) {
+        log(logLevels.ERROR, 'Error extracting from PDF:', error);
+        return '';
+      }
+    }
+
+    /**
+     * Extracts text from Word documents (DOCX)
+     */
+    async function extractFromDOCX(docxData) {
+      try {
+        if (!docxData) return '';
+
+        const arrayBuffer = typeof docxData === 'string' ? base64ToArrayBuffer(docxData) : docxData;
+
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        return preprocessText(result.value);
+      } catch (error) {
+        log(logLevels.ERROR, 'Error extracting from DOCX:', error);
+        return '';
+      }
+    }
+
+    /**
+     * Extracts text from plain text files
+     */
+    function extractFromText(text) {
+      return preprocessText(text);
+    }
+
+    /**
+     * Split text into sentences with improved handling
+     */
+    function splitIntoSentences(text) {
+      const processed = preprocessText(text);
+
+      // Enhanced regex for sentence detection
+      const sentenceRegex = /[^.!?。；!\?]+[.!?。；!\?]+/g;
+
+      return (processed.match(sentenceRegex) || [])
+        .map(sentence => sentence.trim())
+        .filter(Boolean);
+    }
+
+    /**
+     * Split text into words with improved tokenization
+     */
+    function splitIntoWords(text) {
+      const processed = preprocessText(text);
+
+      // Enhanced word tokenization regex
+      const wordRegex = /\b\w+(?:[-']\w+)*\b/g;
+
+      return (processed.match(wordRegex) || []).filter(Boolean);
+    }
+
+    /**
+     * Utility function to convert base64 to ArrayBuffer
+     */
+    function base64ToArrayBuffer(base64) {
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
+    /**
+     * Main extraction function that handles different input types
+     */
+    async function extract(input, type) {
+      try {
+        if (!input) {
+          throw new Error('No input provided for extraction');
+        }
+
+        switch (type?.toLowerCase()) {
+          case 'html':
+            return await extractFromHTML(input);
+          case 'pdf':
+            try {
+              return await extractFromPDF(input);
+            } catch (error) {
+              return await handleExtractionError(error, ERROR_TYPES.PDF_EXTRACTION);
+            }
+          case 'docx':
+            try {
+              return await extractFromDOCX(input);
+            } catch (error) {
+              return await handleExtractionError(error, ERROR_TYPES.DOCX_EXTRACTION);
+            }
+          case 'text':
+            return extractFromText(input);
+          default:
+            // Try to auto-detect type
+            if (typeof input === 'string') {
+              if (input.trim().startsWith('<')) {
+                return await extractFromHTML(input);
+              }
+              return extractFromText(input);
+            }
+            return await handleExtractionError(
+              new Error('Unable to determine input type'),
+              ERROR_TYPES.INVALID_INPUT
             );
-            const sectionText = filteredContent.map(el => el.textContent).join(' ').trim();
-            const preprocessedText = preprocessText(sectionText);
-
-            log(logLevels.DEBUG, 'Extracted and preprocessed text from section', { preprocessedText });
-            return preprocessedText || null;
-        } catch (error) {
-            log(logLevels.ERROR, 'Error extracting text from section', { error });
-            return null;
         }
+      } catch (error) {
+        return await handleExtractionError(error, ERROR_TYPES.INVALID_INPUT);
+      }
     }
 
-    /**
-     * Checks if a given text contains enough legal terms to be considered legal text
-     * @param {string} text The text to analyze
-     * @return {boolean} True if the text contains enough legal terms, false otherwise
-     */
-    function isLegalText(text) {
-        try {
-            log(logLevels.DEBUG, 'Starting legal text analysis', { text });
+    return {
+      extract,
+      extractFromHTML,
+      extractFromPDF,
+      extractFromDOCX,
+      extractFromText,
+      splitIntoSentences,
+      splitIntoWords,
+      preprocessText,
+    };
+  }
 
-            const words = text.toLowerCase().split(/\s+/);
-            const legalTermCount = words.filter(word => legalTerms.includes(word)).length;
-            
-            const threshold = config.sectionThreshold;
-            const isLegal = legalTermCount >= threshold;
-
-            log(logLevels.DEBUG, 'Legal text analysis result', { legalTermCount, threshold, isLegal });
-            return isLegal;
-        } catch (error) {
-            log(logLevels.ERROR, 'Error analyzing legal text', { error });
-            return false;
-        }
-    }
-
-    // Expose the main function to the global scope
-    window.extractAndAnalyzePageText = extractAndAnalyzePageText;
-
-})(window);
+  // Export for both environments
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { createTextExtractor };
+  } else {
+    global.TextExtractor = { create: createTextExtractor };
+  }
+})(typeof window !== 'undefined' ? window : global);

@@ -17,7 +17,6 @@
     "contextMenus", 
     "notifications",
     "storage",
-    "webRequest",
     "scripting"
   ],
   "action": {
@@ -29,36 +28,45 @@
     }
   },
   "background": {
-    "service_worker": "src/service-worker.js",
-    "type": "module" 
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
-        "src/debugger.js",
-        "src/readabilityGrader.js",
-        "src/content.js",
-        "src/utilities.js"
+        "src/lib/cheerio.min.js",
+        "src/lib/compromise.min.js",
+        "src/utils/debugger.js",
+        "src/utils/constants.js",
+        "src/utils/utilities.js",
+        "src/analysis/readabilityGrader.js",
+        "src/analysis/textExtractor.js",
+        "src/analysis/rightsAssessor.js",
+        "src/analysis/uncommonWordsIdentifier.js",
+        "src/analysis/summarizeTos.js",
+        "src/content/content.js"
       ],
-      "css": ["src/styles.css"],
-      "run_at": "document_idle",
-      "type": "module"
+      "css": ["src/styles/styles.css"],
+      "run_at": "document_idle"
     }
   ],
   "side_panel": {
-    "default_path": "src/sidepanel.html"
+    "default_path": "src/panel/sidepanel.html"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "src/legalTerms.js", 
-        "src/sidepanel.html", 
-        "src/styles.css",
-        "node_modules/cheerio/lib/cheerio.min.js",
-        "node_modules/compromise/builds/compromise.min.js"
+        "src/data/*.js",
+        "src/data/dictionaries/*.json",
+        "src/panel/sidepanel.html",
+        "src/styles/*.css",
+        "src/lib/*.js"
       ],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'"
+  }
 }

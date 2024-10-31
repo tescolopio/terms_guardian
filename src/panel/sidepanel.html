@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms Guardian Analysis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="sidepanel-content" class="loading">
+    <header class="panel-header">
+      <h1>Terms Guardian</h1>
+      <h2>Know Your Terms, Know Your Rights!</h2>
+      
+      <div class="analysis-header">
+        <div class="url-container">
+          <a id="terms-url" href="#" target="_blank" rel="noopener"></a>
+        </div>
+        <h3 id="terms-title"></h3>
+      </div>
+      
+      <div class="scores">
+        <div class="score-card readability-score" data-popup="readabilityPopup">
+          <div class="grade-circle">
+            <span id="readability-grade">-</span>
+          </div>
+          <p>Readability Score</p>
+          <div id="readabilityPopup" class="popup" role="tooltip">
+            <div class="popup-content"></div>
+          </div>
+        </div>
+        
+        <div class="score-card user-rights-index" data-popup="rightsPopup">
+          <div class="grade-circle">
+            <span id="user-rights-index">-</span>
+          </div>
+          <p>User Rights Index</p>
+          <div id="rightsPopup" class="popup" role="tooltip">
+            <div class="popup-content"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="analysis-content">
+      <div class="loading-indicator">Analyzing document...</div>
+      
+      <section class="column">
+        <h2>Overall Summary</h2>
+        <div id="overall-summary" class="content-section">
+          <div class="placeholder">Loading summary...</div>
+        </div>
+      </section>
+      
+      <section class="column">
+        <h2>Summary by Section</h2>
+        <div id="section-summaries" class="content-section">
+          <div class="placeholder">Loading sections...</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="additional-info">
+      <section class="key-excerpts" data-popup="excerptsPopup">
+        <h2>Key Excerpts</h2>
+        <div id="key-excerpts-list" class="content-section">
+          <div class="placeholder">Loading excerpts...</div>
+        </div>
+        <div id="excerptsPopup" class="popup" role="tooltip">
+          <div class="popup-content"></div>
+        </div>
+      </section>
+      
+      <section class="uncommon-terms" data-popup="termsPopup">
+        <h2>Uncommon Terms</h2>
+        <div id="uncommon-terms-list" class="content-section">
+          <div class="placeholder">Loading terms...</div>
+        </div>
+        <div id="termsPopup" class="popup" role="tooltip">
+          <div class="popup-content"></div>
+        </div>
+      </section>
+    </aside>
+
+    <footer class="panel-footer">
+      <div class="action-buttons">
+        <button type="button" id="contactBtn" class="action-button">Contact Us</button>
+        <button type="button" id="reportBtn" class="action-button">Report Issue</button>
+        <button type="button" id="githubBtn" class="action-button">Github</button>
+        <button type="button" id="feedbackBtn" class="action-button">Give Feedback</button>
+        <button type="button" id="donateBtn" class="action-button">Donate</button>
+      </div>
+      <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+    </footer>
+  </div>
+
+  <script src="constants.js"></script>
+  <script src="debugger.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

@@ -11,60 +11,82 @@
  *  - 2024-09-25 | tescolopio | Initial creation of the script.
  */
 
-import * as tf from '@tensorflow/tfjs';
-
-export class ModelHandler {
-    constructor() {
-        this.model = null;
-    }
-
-    async loadModel(modelUrl) {
+(function(global) {
+    'use strict';
+  
+    function createModelHandler({ log, logLevels }) {
+      let model = null;
+  
+      /**
+       * Loads a TensorFlow.js model
+       * @param {string} modelUrl URL to the model
+       */
+      async function loadModel(modelUrl) {
         try {
-            this.model = await tf.loadLayersModel(modelUrl);
-            console.log('Model loaded successfully');
+          model = await tf.loadLayersModel(modelUrl);
+          log(logLevels.INFO, 'Model loaded successfully');
         } catch (error) {
-            console.error('Error loading model:', error.message, error.stack);
+          log(logLevels.ERROR, 'Error loading model:', error);
+          throw error;
         }
-    }
-
-    async analyzeText(text) {
-        if (!this.model) {
-            console.error('Model not loaded');
-            return 'Error: Model not loaded.';
+      }
+  
+      /**
+       * Analyzes text using the loaded model
+       * @param {string} text Text to analyze
+       */
+      async function analyzeText(text) {
+        if (!model) {
+          const error = new Error('Model not loaded');
+          log(logLevels.ERROR, error.message);
+          throw error;
         }
-
+  
         try {
-            // Preprocess text for model input here. The preprocessing will depend on the model's expected input format.
-            const processedText = this.preprocessText(text);
-
-            // Convert processed text to tensor or appropriate format for the model input
-            const inputTensor = tf.tensor2d([processedText], [1, processedText.length]); // Adjust shape according to your model's input
-
-            // Perform prediction
-            const prediction = this.model.predict(inputTensor);
-
-            // Postprocess model output to get the content grade. This might involve converting tensor outputs to human-readable format or grades.
-            const contentGrade = await this.postprocessPrediction(prediction);
-
-            return contentGrade;
+          const processedText = preprocessText(text);
+          const inputTensor = tf.tensor2d([processedText], [1, processedText.length]);
+          const prediction = model.predict(inputTensor);
+          return await postprocessPrediction(prediction);
         } catch (error) {
-            console.error('Error analyzing text:', error.message, error.stack);
-            return 'Error: Problem during the analysis.';
+          log(logLevels.ERROR, 'Error analyzing text:', error);
+          throw error;
         }
-    }
-
-
-    async postprocessPrediction(prediction) {
-        // Placeholder for postprocessing logic
-        // This should convert the model's prediction to a grade or other meaningful output
+      }
+  
+      /**
+       * Processes prediction output
+       * @param {tf.Tensor} prediction Model prediction
+       */
+      async function postprocessPrediction(prediction) {
         try {
-            const predictionArray = await prediction.array();
-            console.log('Prediction output:', predictionArray);
-            // This is a simplification. Replace it with actual logic to interpret your model's output.
-            return 'A'; // Example grade, replace with actual postprocessing to interpret the model's output
+          const predictionArray = await prediction.array();
+          log(logLevels.DEBUG, 'Raw prediction:', predictionArray);
+          
+          // Replace with actual grade calculation logic
+          return {
+            grade: 'A',
+            confidence: 0.95,
+            details: predictionArray
+          };
         } catch (error) {
-            console.error('Error processing prediction output:', error.message, error.stack);
-            return 'Error: Problem during postprocessing.';
+          log(logLevels.ERROR, 'Error processing prediction:', error);
+          throw error;
         }
+      }
+  
+      return {
+        loadModel,
+        analyzeText
+      };
     }
-}
+  
+    // Export for both Chrome extension and test environments
+    if (typeof module !== 'undefined' && module.exports) {
+      module.exports = { createModelHandler };
+    } else {
+      global.ModelHandler = {
+        create: createModelHandler
+      };
+    }
+  
+  })(typeof window !== 'undefined' ? window : global);

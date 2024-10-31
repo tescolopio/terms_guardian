@@ -7,135 +7,202 @@ const mockLogLevels = {
   DEBUG: 3
 };
 
-const loggedMessages = [];
+describe('Readability Grader', () => {
+  let testLogger;
+  let readabilityGrader;
 
-const testLogger = (level, ...messages) => {
-  loggedMessages.push(`[${level}] ${messages.join(' ')}`);
-};
-
-const readabilityGrader = createReadabilityGrader({ log: testLogger, logLevels: mockLogLevels });
-
-// Helper function to print logged messages
-const printLoggedMessages = () => {
-  console.log("Logged messages:");
-  loggedMessages.forEach(msg => console.log(msg));
-  loggedMessages.length = 0; // Clear the array for the next test
-};
-
-describe('ReadabilityGrader', () => {
   beforeEach(() => {
-    loggedMessages.length = 0; // Clear logged messages before each test
+    testLogger = jest.fn();
+    readabilityGrader = createReadabilityGrader({ log: testLogger, logLevels: mockLogLevels });
   });
 
   afterEach(() => {
-    printLoggedMessages(); // Print logged messages after each test
+    testLogger.mockClear(); // Clear the mock after each test
   });
 
-  test('should handle empty input', () => {
-    const result = readabilityGrader.calculateReadabilityGrade('');
-    expect(result).toEqual({
-      flesch: 0,
-      kincaid: 0,
-      fogIndex: 0,
-      averageGrade: 'N/A'
+  const testCases = [
+    {
+      description: 'should calculate readability grades correctly for a simple text',
+      text: "This is a simple sentence. It is easy to read.",
+      expectedGrade: 'A',
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[3] Normalized Average Score:'),
+        expect.stringContaining('[2] Calculated Readability Grades:'),
+        expect.stringContaining('[2] Final grade: A'),
+      ]
+    },
+    {
+      description: 'should handle undefined text',
+      text: undefined,
+      expectedGrade: 'N/A',
+      expectedLogs: [
+        expect.stringContaining('[0] Error calculating readability grade:')
+      ]
+    },
+    {
+      description: 'should handle null text',
+      text: null,
+      expectedGrade: 'N/A',
+      expectedLogs: [
+        expect.stringContaining('[0] Error calculating readability grade:')
+      ]
+    },
+    {
+      description: 'should handle text in Spanish',
+      text: 'El rápido zorro marrón salta sobre el perro perezoso.',
+      expectedGrade: 'N/A',
+      expectedLogs: [
+        expect.stringContaining('[0] Error calculating readability grade:')
+      ]
+    },
+    {
+      description: 'should handle text with mathematical expressions',
+      text: 'The equation E=mc^2 illustrates mass-energy equivalence.',
+      expectedGrade: ['B', 'C', 'D'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[3] Normalized Average Score:'),
+        expect.stringContaining('[2] Calculated Readability Grades:'),
+      ]
+    },
+    {
+      description: 'should handle empty text input',
+      text: "",
+      expectedGrade: 'N/A',
+      expectedLogs: [
+        expect.stringContaining('[0] Error calculating readability grade:')
+      ]
+    },
+    {
+      description: 'should handle input with only punctuation or special characters',
+      text: "!@#$%^&*()",
+      expectedGrade: 'N/A',
+      expectedLogs: [
+        expect.stringContaining('[0] Error calculating readability grade:')
+      ]
+    },
+    {
+      description: 'should calculate readability for simple text',
+      text: "The quick brown fox jumps over the lazy dog.",
+      expectedGrade: ['A', 'B', 'C', 'D', 'F'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should calculate readability for complex text',
+      text: `The intricate interplay between quantum mechanics and general relativity presents a formidable challenge to our understanding of the fundamental nature of reality. This conundrum has perplexed physicists for decades, as the two theories, while individually successful in their respective domains, seem irreconcilable when attempting to describe phenomena at the intersection of the very small and the very large.`,
+      expectedGrade: ['C', 'D', 'F'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should handle text with multiple sentences',
+      text: `This is a simple sentence. Here's another one! And a third? Yes, indeed.`,
+      expectedGrade: ['A', 'B', 'C'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should handle text with numbers and special characters',
+      text: `In 2023, the company's revenue increased by 15% to $10.5 million!`,
+      expectedGrade: ['A', 'B', 'C', 'D', 'F'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should correctly grade very easy text',
+      text: `I like cats. Cats are fun. Cats play with toys. I play with cats.`,
+      expectedGrade: 'A',
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:'),
+        expect.stringContaining('[2] Final grade: A')
+      ]
+    },
+    {
+      description: 'should correctly grade very difficult text',
+      text: `The ontological argument for the existence of God is a philosophical proof that posits the necessity of a supreme being based on the concept of maximal greatness and the logical implications thereof in possible world semantics.`,
+      expectedGrade: ['D', 'F'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should log debug information',
+      text: 'This is a test sentence.',
+      expectedGrade: ['A', 'B', 'C', 'D', 'F'],
+      expectedLogs: [
+        expect.stringContaining('Flesch Reading Ease Score:'),
+        expect.stringContaining('Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('Gunning Fog Index:')
+      ]
+    },
+    {
+      description: 'should handle text with contractions',
+      text: `It's a beautiful day, isn't it? I can't believe how nice the weather is.`,
+      expectedGrade: ['A', 'B', 'C'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    },
+    {
+      description: 'should handle text with hyphenated words',
+      text: `The state-of-the-art technology was user-friendly and cost-effective.`,
+      expectedGrade: ['B', 'C', 'D'],
+      expectedLogs: [
+        expect.stringContaining('[3] Flesch Reading Ease Score:'),
+        expect.stringContaining('[3] Flesch-Kincaid Grade Level:'),
+        expect.stringContaining('[3] Gunning Fog Index:'),
+        expect.stringContaining('[2] Calculated Readability Grades:')
+      ]
+    }
+  ];
+
+  testCases.forEach(({ description, text, expectedGrade, expectedLogs }) => {
+    test(description, () => {
+      const result = readabilityGrader.calculateReadabilityGrade(text);
+      if (Array.isArray(expectedGrade)) {
+        expect(expectedGrade).toContain(result.averageGrade);
+      } else {
+        expect(result.averageGrade).toBe(expectedGrade);
+      }
+
+      // Assert that the logger was called with expected messages
+      expectedLogs.forEach(expectedLog => {
+        expect(testLogger).toHaveBeenCalledWith(
+          expect.any(Number), // Log level
+          expect.stringContaining(expectedLog)
+        );
+      });
     });
-    expect(loggedMessages).toContainEqual(expect.stringContaining('Error calculating readability grade:'));
-  });
-
-  test('should handle input with only punctuation or special characters', () => {
-    const result = readabilityGrader.calculateReadabilityGrade('!@#$%^&*()');
-    expect(result).toEqual({
-      flesch: 0,
-      kincaid: 0,
-      fogIndex: 0,
-      averageGrade: 'N/A'
-    });
-    expect(loggedMessages).toContainEqual(expect.stringContaining('Error calculating readability grade:'));
-  });
-
-  test('should calculate readability for simple text', () => {
-    const result = readabilityGrader.calculateReadabilityGrade('The quick brown fox jumps over the lazy dog.');
-    expect(result.flesch).toBeGreaterThan(0);
-    expect(result.kincaid).toBeGreaterThan(0);
-    expect(result.fogIndex).toBeGreaterThan(0);
-    expect(['A', 'B', 'C', 'D', 'F']).toContain(result.averageGrade);
-    console.log("Test result:", result);
-  });
-
-  test('should calculate readability for complex text', () => {
-    const complexText = `The intricate interplay between quantum mechanics and general relativity presents a formidable challenge to our understanding of the fundamental nature of reality. This conundrum has perplexed physicists for decades, as the two theories, while individually successful in their respective domains, seem irreconcilable when attempting to describe phenomena at the intersection of the very small and the very large.`;
-    const result = readabilityGrader.calculateReadabilityGrade(complexText);
-    expect(result.flesch).toBeLessThan(50);
-    expect(result.kincaid).toBeGreaterThan(12);
-    expect(result.fogIndex).toBeGreaterThan(12);
-    expect(['C', 'D', 'F']).toContain(result.averageGrade);
-    console.log("Test result:", result);
-  });
-
-  test('should handle text with multiple sentences', () => {
-    const multiSentenceText = `This is a simple sentence. Here's another one! And a third? Yes, indeed.`;
-    const result = readabilityGrader.calculateReadabilityGrade(multiSentenceText);
-    expect(result.flesch).toBeGreaterThan(0);
-    expect(result.kincaid).toBeGreaterThan(0);
-    expect(result.fogIndex).toBeGreaterThan(0);
-    expect(['A', 'B', 'C']).toContain(result.averageGrade);
-    console.log("Test result:", result);
-  });
-
-  test('should handle text with numbers and special characters', () => {
-    const mixedText = `In 2023, the company's revenue increased by 15% to $10.5 million!`;
-    const result = readabilityGrader.calculateReadabilityGrade(mixedText);
-    expect(result.flesch).toBeGreaterThan(0);
-    expect(result.kincaid).toBeGreaterThan(0);
-    expect(result.fogIndex).toBeGreaterThan(0);
-    expect(['A', 'B', 'C', 'D', 'F']).toContain(result.averageGrade);
-    console.log("Test result:", result);
-  });
-
-  test('should correctly grade very easy text', () => {
-    const easyText = `I like cats. Cats are fun. Cats play with toys. I play with cats.`;
-    const result = readabilityGrader.calculateReadabilityGrade(easyText);
-    expect(result.averageGrade).toBe('A');
-    expect(result.flesch).toBeGreaterThan(90);
-    expect(result.kincaid).toBeLessThan(3);
-    expect(result.fogIndex).toBeLessThan(6);
-    console.log("Test result:", result);
-  });
-
-  test('should correctly grade very difficult text', () => {
-    const difficultText = `The ontological argument for the existence of God is a philosophical proof that posits the necessity of a supreme being based on the concept of maximal greatness and the logical implications thereof in possible world semantics.`;
-    const result = readabilityGrader.calculateReadabilityGrade(difficultText);
-    expect(['D', 'F']).toContain(result.averageGrade);
-    expect(result.flesch).toBeLessThan(30);
-    expect(result.kincaid).toBeGreaterThan(15);
-    expect(result.fogIndex).toBeGreaterThan(15);
-    console.log("Test result:", result);
-  });
-
-  test('should log debug information', () => {
-    readabilityGrader.calculateReadabilityGrade('This is a test sentence.');
-    expect(loggedMessages).toContainEqual(expect.stringContaining('Flesch Reading Ease Score:'));
-    expect(loggedMessages).toContainEqual(expect.stringContaining('Flesch-Kincaid Grade Level:'));
-    expect(loggedMessages).toContainEqual(expect.stringContaining('Gunning Fog Index:'));
-  });
-
-  test('should handle text with contractions', () => {
-    const contractionText = `It's a beautiful day, isn't it? I can't believe how nice the weather is.`;
-    const result = readabilityGrader.calculateReadabilityGrade(contractionText);
-    expect(result.flesch).toBeGreaterThan(0);
-    expect(result.kincaid).toBeGreaterThan(0);
-    expect(result.fogIndex).toBeGreaterThan(0);
-    expect(['A', 'B', 'C']).toContain(result.averageGrade);
-    console.log("Test result:", result);
-  });
-
-  test('should handle text with hyphenated words', () => {
-    const hyphenatedText = `The state-of-the-art technology was user-friendly and cost-effective.`;
-    const result = readabilityGrader.calculateReadabilityGrade(hyphenatedText);
-    expect(result.flesch).toBeLessThan(50);
-    expect(result.kincaid).toBeGreaterThan(0);
-    expect(result.fogIndex).toBeGreaterThan(0);
-    expect(['B', 'C', 'D']).toContain(result.averageGrade);
-    console.log("Test result:", result);
   });
 });

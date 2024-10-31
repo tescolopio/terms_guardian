@@ -13,7 +13,7 @@
  *  - 2024-09-25 | tescolopio | Modified to work with Chrome extension content scripts.
  */
 
-window.legalTerms = [
+const legalTerms = [
     'terms of service', 'terms and conditions', 'user agreement', 'service agreement',
     'terms of use', 'legal terms', 'user terms', 'usage policy', 'acceptable use policy',
     'end user license agreement', 'eula', 'legal notice', 'site terms', 'website terms',
@@ -25,3 +25,10 @@ window.legalTerms = [
     'sla', 'data protection', 'cookie policy', 'gdpr', 'ccpa', 'privacy policy', 'refund policy',
     'return policy', 'cancellation policy', 'billing terms', 'payment terms', 'subscription terms'
 ];
+
+if (typeof window !== 'undefined') {
+    window.legalTerms = legalTerms;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { legalTerms };}
