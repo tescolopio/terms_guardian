@@ -39,17 +39,16 @@ function ensureDirectoryExists(dirPath) {
 // Download file from URL
 async function downloadFile(url, destination) {
   return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destination);
     https.get(url, response => {
       if (response.statusCode !== 200) {
         reject(new Error(`Failed to download ${url}: ${response.statusCode}`));
         return;
       }
 
-      const file = fs.createWriteStream(destination);
       response.pipe(file);
       file.on('finish', () => {
-        file.close();
-        resolve();
+        file.close(resolve);
       });
     }).on('error', error => {
       fs.unlink(destination, () => {});
@@ -73,16 +72,16 @@ async function copyLibraryFiles() {
     // Copy PDF.js files
     const pdfjsFiles = [
       {
-        src: path.join(pdfjsPath, 'build', 'pdf.js'),
-        dest: 'pdf.js'
+        src: path.join(pdfjsPath, 'build', 'pdf.mjs'),
+        dest: 'pdf.mjs'
       },
       {
-        src: path.join(pdfjsPath, 'build', 'pdf.worker.js'),
-        dest: 'pdf.worker.js'
+        src: path.join(pdfjsPath, 'build', 'pdf.worker.mjs'),
+        dest: 'pdf.worker.mjs'
       },
       {
-        src: path.join(pdfjsPath, 'web', 'pdf_viewer.js'),
-        dest: 'pdf_viewer.js'
+        src: path.join(pdfjsPath, 'web', 'pdf_viewer.mjs'),
+        dest: 'pdf_viewer.mjs'
       },
       {
         src: path.join(pdfjsPath, 'web', 'pdf_viewer.css'),
@@ -130,8 +129,8 @@ async function copyLibraryFiles() {
 
     // Handle CDN dependencies
     const CDN_DEPS = {
-      'cheerio.min.js': 'https://cdnjs.cloudflare.com/ajax/libs/cheerio/1.0.0/cheerio.min.js',
-      'compromise.min.js': 'https://cdnjs.cloudflare.com/ajax/libs/compromise/14.14.0/compromise.min.js'
+      'cheerio.min.js': 'https://cdnjs.cloudflare.com/ajax/libs/cheerio/1.0.0-rc.10/cheerio.min.js',
+      'compromise.min.js': 'https://unpkg.com/compromise@14.14.0/builds/compromise.min.js'
     };
 
     for (const [filename, url] of Object.entries(CDN_DEPS)) {
@@ -168,4 +167,7 @@ async function copyLibraryFiles() {
 }
 
 // Run the script
-copyLibraryFiles();
+copyLibraryFiles().then(() => process.exit(0)).catch(error => {
+  console.error('\n❌ Error in script execution:', error);
+  process.exit(1);
+});

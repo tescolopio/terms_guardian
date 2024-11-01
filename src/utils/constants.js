@@ -37,6 +37,13 @@
 
     // Analysis Settings
     ANALYSIS: {
+      PERFORMANCE_THRESHOLDS: {
+        TEXT_PROCESSING: 100,
+        API_CALL: 2000,
+        GRADE_CALCULATION: 50,
+        RIGHTS_ANALYSIS: 150,
+        EXTRACTION: 200
+      },
       CHUNK_SIZE: 500,          // Size of text chunks for processing
       MIN_WORD_LENGTH: 3,       // Minimum length for word analysis
       MAX_RETRIES: 3,           // Maximum API retry attempts

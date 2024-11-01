@@ -1,0 +1,15 @@
+# Production
+/build
+
+# Generated files
+.docusaurus
+.cache-loader
+
+# Only contains the Webpack cache
+/.yarn
+
+# Misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

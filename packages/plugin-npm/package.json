@@ -1,0 +1,52 @@
+{
+  "name": "@yarnpkg/plugin-npm",
+  "version": "3.0.1",
+  "license": "BSD-2-Clause",
+  "main": "./sources/index.ts",
+  "exports": {
+    ".": "./sources/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@yarnpkg/fslib": "workspace:^",
+    "enquirer": "^2.3.6",
+    "lodash": "^4.17.15",
+    "semver": "^7.1.2",
+    "ssri": "^6.0.1",
+    "tslib": "^2.4.0"
+  },
+  "peerDependencies": {
+    "@yarnpkg/core": "workspace:^",
+    "@yarnpkg/plugin-pack": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.136",
+    "@types/semver": "^7.1.0",
+    "@types/ssri": "^6.0.1",
+    "@yarnpkg/core": "workspace:^",
+    "@yarnpkg/plugin-pack": "workspace:^"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/yarnpkg/berry.git",
+    "directory": "packages/plugin-npm"
+  },
+  "scripts": {
+    "postpack": "rm -rf lib",
+    "prepack": "run build:compile \"$(pwd)\""
+  },
+  "publishConfig": {
+    "main": "./lib/index.js",
+    "exports": {
+      ".": "./lib/index.js",
+      "./package.json": "./package.json"
+    }
+  },
+  "files": [
+    "/lib/**/*"
+  ],
+  "engines": {
+    "node": ">=18.12.0"
+  },
+  "stableVersion": "3.0.1"
+}

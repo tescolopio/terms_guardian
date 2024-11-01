@@ -1,26 +1,38 @@
-const config = {
+/**
+ * @file jest.config.js
+ * @description Jest configuration for Terms Guardian extension
+ */
+
+module.exports = {
+  // Basic Configuration
+  testEnvironment: 'jsdom',
+  verbose: true,
   clearMocks: true,
+
+  // Coverage Configuration
   collectCoverage: true,
-  coverageDirectory: "coverage",
-  coverageProvider: "babel",
-  coverageReporters: ["json", "text", "lcov", "clover"],
-  moduleFileExtensions: ["js", "mjs", "cjs", "jsx", "json", "node"],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov'],
+
+  // Module Configuration
+  moduleDirectories: ['node_modules', 'src'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '\\.(css|less|scss|sss|styl)$': '<rootDir>/node_modules/jest-css-modules'
+    '\\.(css|less|scss|sss|styl)$': 'identity-obj-proxy'
   },
-  transform: {
-    "^.+\\.jsx?$": "babel-jest"
-  },
-  transformIgnorePatterns: ['<rootDir>/node_modules/'],
-  setupFilesAfterEnv: [
-    '<rootDir>/tests/setupJest.js'
-  ],
-  testEnvironment: "jsdom",
-  verbose: true,
-  testMatch: ["**/tests/**/*.test.js"],
-  roots: ["<rootDir>"],
-  moduleDirectories: ["node_modules", "src"]
-};
 
-module.exports = config;
+  // Transform Configuration
+  transform: {
+    '^.+\\.jsx?$': 'babel-jest'
+  },
+
+  // Test Configuration
+  testMatch: ['<rootDir>/tests/unit/**/*.test.js'],
+  
+  // Setup Files
+  setupFiles: ['<rootDir>/tests/setupTests.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+
+  // Transform Ignore Patterns
+  transformIgnorePatterns: ['/node_modules/']
+};
