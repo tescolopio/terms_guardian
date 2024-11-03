@@ -8,6 +8,10 @@ datasets/
 popup/
 .env
 .vscode/
+archive/
 
 # Ignore backup files
 *.old
+
+*.lock
+.yarn
