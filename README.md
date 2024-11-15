@@ -2,38 +2,59 @@
 
 ## We believe
 
-- You should always know what rights you are retaining or surrendering when you agree to any Terms of Service, because knowledge is power and clear, accessible information empowers you to make informed decisions.
-- Everyone deserves to understand the agreements they enter into without needing a law degree, and complex legal jargon should not stand in the way of understanding your rights and responsibilities.
-- Everyone, regardless of their background, should have access to clear and concise legal documents, and companies should be held accountable for the clarity and fairness of their Terms of Service.
-- Building trust between users and service providers starts with clear and honest communication, and leveraging technology to simplify legal language is a step towards a more user-friendly internet.
+- You should always know what rights you are retaining or surrendering when you agree to any Terms of Service.
+- Everyone deserves to understand the agreements they enter into without needing a law degree.
+- Companies should be held accountable for the clarity and fairness of their Terms of Service.
+- Building trust between users and service providers starts with clear and honest communication.
+- Leveraging technology to simplify legal language is a step towards a more user-friendly internet.
 
+## What is Term Guardian?
 
 Terms Guardian is a web browser extension designed to empower users by demystifying the complex language often found in Terms of Service (ToS) agreements. It automatically detects ToS text on websites, grades its readability, summarizes its content into plain language, and assesses the rights retained or surrendered.
 
 ## Features
 
-- **ToS Detection**: Automatically detects when you're viewing a Terms of Service agreement.
-- **Summary Generation**: Provides a concise summary of the ToS in plain language.
-- **Readability Grade**: Grades the ToS text for language complexity using one readability algorithm (Flesch-Kincaid Readability).
-- **Rights Retention Grade**: Grades the ToS based on how much freedom or rights are retained or taken, using a sophisticated TensorFlow.js language model.
-- **Enhanced Readability Grading**: Utilizes additional algorithms (Dale-Chall Readability and Gunning Fog Index) for a more comprehensive language difficulty assessment.
-- **Uncommon Word Definitions**: Provides definitions for uncommon words or excerpts that significantly contribute to the grades.
+### 1. Plain Language Summary
+- **What it is**: A concise, easy-to-understand explanation of the ToS
+  - Breaks down complex legal concepts into everyday language
+  - Highlights key points that affect user rights
+  - Identifies important obligations and commitments
+  - Points out unusual or important terms
 
-## Additional Functionality
+### 2. Readability Assessment
+- **What it is**: A multi-faceted analysis of the text's complexity
+  - Flesch-Kincaid Readability Score (0-100, higher is more readable)
+  - Dale-Chall Readability Index (Grade level equivalent)
+  - Gunning Fog Index (Years of formal education needed)
 
-- Detects and highlights legal agreements on web pages
-- Extracts relevant legal text for easy reading
-- Opens a side panel with detailed information when activated
+### 3. Rights Retention Grade
+- **What it is**: An analysis of user rights within the agreement
+  - A letter grade (A+-F-) and numerical score (0-100) indicating overall rights fairness
+  - Detailed breakdown of rights analysis
+  - Rights retained by the user
+  - Rights surrendered to the service
+  - Unusual rights transfers
+  - Industry standard comparisons
+- **Rights Categories**:
+  - Data Rights
+  - Privacy Rights
+  - Content Rights
+  - Usage Rights
+  - Cancellation Rights
 
-## Installation
+### 4. Legal Terms Dictionary
+- **What it is**: Context-aware definitions of complex legal terms
+  - Plain language definitions
+  - Usage examples
+  - Legal implications
+  - Common variations
 
-1. Clone this repository or download the source code.
-2. Open your browser's extension management page:
-   - Chrome: `chrome://extensions`
-   - Firefox: `about:addons`
-3. Enable "Developer mode" (usually a toggle in the top right corner).
-4. Click "Load unpacked" (Chrome) or "Load Temporary Add-on" (Firefox).
-5. Select the directory containing the extension files.
+## How It Works
+
+- Automatically identifies legal documents
+- Extracts relevant text
+- Performs multi-layer analysis
+- Generates educational insights
 
 ## Usage
 
@@ -43,13 +64,12 @@ Terms Guardian can be activated in three ways:
 2. **Popup Notification**: Click on the popup notification that appears when a legal agreement is detected on a page.
 3. **Extension Icon**: Click the Terms Guardian icon in the browser's toolbar.
 
-Once activated, a side panel will open, displaying:
-
-- The extracted legal text (if applicable)
-- A summary of the legal document
-- Readability grades
-- Rights retention assessment
-- Additional information about the detected agreement
+The educational side panel displays:
+- Plain language summary
+- Readability scores with explanation
+- Rights retention analysis
+- Interactive legal terms dictionary
+- Document-specific insights
 
 ## Components
 
@@ -61,6 +81,16 @@ Once activated, a side panel will open, displaying:
 - `readabilityGrader.js`: Calculates readability scores using various algorithms
 - `rightsAssessor.js`: Evaluates the rights retention based on the ToS content
 - `styles.css`: Defines styles for highlighted text and the popup interface
+
+## Installation
+
+1. Clone this repository or download the source code
+2. Open your browser's extension management page:
+   - Chrome: `chrome://extensions`
+   - Firefox: `about:addons`
+3. Enable "Developer mode"
+4. Click "Load unpacked" (Chrome) or "Load Temporary Add-on" (Firefox)
+5. Select the extension directory
 
 ## Permissions
 
