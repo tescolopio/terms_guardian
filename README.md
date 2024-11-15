@@ -1,5 +1,13 @@
 # Terms Guardian
 
+## We believe
+
+- You should always know what rights you are retaining or surrendering when you agree to any Terms of Service, because knowledge is power and clear, accessible information empowers you to make informed decisions.
+- Everyone deserves to understand the agreements they enter into without needing a law degree, and complex legal jargon should not stand in the way of understanding your rights and responsibilities.
+- Everyone, regardless of their background, should have access to clear and concise legal documents, and companies should be held accountable for the clarity and fairness of their Terms of Service.
+- Building trust between users and service providers starts with clear and honest communication, and leveraging technology to simplify legal language is a step towards a more user-friendly internet.
+
+
 Terms Guardian is a web browser extension designed to empower users by demystifying the complex language often found in Terms of Service (ToS) agreements. It automatically detects ToS text on websites, grades its readability, summarizes its content into plain language, and assesses the rights retained or surrendered.
 
 ## Features
