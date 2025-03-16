@@ -8,7 +8,7 @@
 - Building trust between users and service providers starts with clear and honest communication.
 - Leveraging technology to simplify legal language is a step towards a more user-friendly internet.
 
-## What is Term Guardian?
+## What is Terms Guardian?
 
 Terms Guardian is a web browser extension designed to empower users by demystifying the complex language often found in Terms of Service (ToS) agreements. It automatically detects ToS text on websites, grades its readability, summarizes its content into plain language, and assesses the rights retained or surrendered.
 
