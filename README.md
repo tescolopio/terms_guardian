@@ -26,10 +26,12 @@ Terms Guardian is a web browser extension designed to empower users by demystify
   - Flesch-Kincaid Readability Score (0-100, higher is more readable)
   - Dale-Chall Readability Index (Grade level equivalent)
   - Gunning Fog Index (Years of formal education needed)
+  - Letter grades from A+ to F- that translate scores into intuitive ratings
+  - For detailed methodology, see our [Content Grading Guide](docs/contentGrading.md)
 
 ### 3. Rights Retention Grade
 - **What it is**: An analysis of user rights within the agreement
-  - A letter grade (A+-F-) and numerical score (0-100) indicating overall rights fairness
+  - A letter grade (A+ to F-) and numerical score (0-100) indicating overall rights fairness
   - Detailed breakdown of rights analysis
   - Rights retained by the user
   - Rights surrendered to the service
@@ -41,6 +43,7 @@ Terms Guardian is a web browser extension designed to empower users by demystify
   - Content Rights
   - Usage Rights
   - Cancellation Rights
+- **Grading Methodology**: Our comprehensive [Content Grading Guide](docs/contentGrading.md) explains how we assess user rights and readability in detail
 
 ### 4. Legal Terms Dictionary
 - **What it is**: Context-aware definitions of complex legal terms
@@ -70,6 +73,12 @@ The educational side panel displays:
 - Rights retention analysis
 - Interactive legal terms dictionary
 - Document-specific insights
+
+## Documentation
+
+- [Content Grading Methodology](docs/contentGrading.md): Detailed explanation of our User Rights Index and Readability assessment methodology
+- [Installation Guide](docs/installation.md): Step-by-step instructions for installing and configuring Terms Guardian
+- [Developer Documentation](docs/development.md): Guidelines for contributing to the project
 
 ## Components
 
